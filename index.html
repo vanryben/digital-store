@@ -139,7 +139,7 @@
             </div>
         </div>
 
-        <!-- SECTION: DEPOSIT (Mockup untuk Payment Gateway) -->
+        <!-- SECTION: DEPOSIT -->
         <div id="section-deposit" class="card hidden">
             <h2 class="card-title">Isi Saldo (Deposit)</h2>
             <p style="margin-bottom: 20px; color: var(--text-muted);">Silakan pilih nominal deposit. Pembayaran diproses otomatis 24 jam menggunakan iPaymu/TriPay.</p>
@@ -166,26 +166,10 @@
     </footer>
 
     <script>
-        /* ===================================================================
-           PERINGATAN KEAMANAN SANGAT PENTING (SECURITY WARNING)
-           ===================================================================
-           JANGAN PERNAH menaruh API Key 5sim Anda (a9750a4f69ea0e66...) di dalam 
-           file HTML/JavaScript ini jika di-hosting di GitHub Pages.
-           
-           Jika ditaruh di sini, semua orang di internet bisa melihat API Key Anda 
-           dengan cara "View Page Source" dan MENCURI/MENGURAS SALDO 5sim Anda.
-           
-           Selain itu, 5sim API memiliki sistem CORS yang akan memblokir permintaan 
-           langsung dari browser.
-           
-           Solusi: File ini adalah FRONTEND UI (Antarmuka) agar disetujui TriPay/iPaymu.
-           Untuk operasional asli, tombol ini harus memanggil BACKEND Anda (misal PHP/Node.js),
-           lalu Backend Anda yang memanggil 5sim API dengan aman.
-        =================================================================== */
 
         let cancelTimer;
-        let timeLeft = 300; // 5 menit = 300 detik
-        const PROFIT_MARGIN = 1000; // Profit Rp 1.000 per transaksi
+        let timeLeft = 300;
+        const PROFIT_MARGIN = 1000;
 
         function showSection(sectionId) {
             document.getElementById('section-nokos').classList.add('hidden');
@@ -194,14 +178,12 @@
         }
 
         function showOperators() {
-            // Simulasi pemanggilan API (Di aplikasi asli, ini akan fetch ke backend Anda)
             document.getElementById('step-1').classList.add('hidden');
             document.getElementById('step-2').classList.remove('hidden');
 
             const container = document.getElementById('operator-container');
-            container.innerHTML = ''; // Clear lama
+            container.innerHTML = '';
 
-            // Mock Data Operator (Harga Asli 5sim + Profit Rp 1000)
             const mockOperators = [
                 { name: 'Telkomsel', basePrice: 3500 },
                 { name: 'Indosat', basePrice: 3000 },
@@ -237,15 +219,14 @@
             document.getElementById('display-number').innerText = "Memproses...";
             document.getElementById('display-otp').innerHTML = `<span style="color: var(--text-muted); font-size: 16px;">Menunggu SMS masuk...</span>`;
             
-            // Simulasi delay ambil nomor dari API
             setTimeout(() => {
-                document.getElementById('display-number').innerText = "+62 812 3456 7890"; // Mock Number
+                document.getElementById('display-number').innerText = "+62 812 3456 7890";
                 startCancelTimer();
             }, 1500);
         }
 
         function startCancelTimer() {
-            timeLeft = 300; // Reset ke 5 menit
+            timeLeft = 300;
             const btnCancel = document.getElementById('btn-cancel');
             btnCancel.disabled = true;
             
@@ -270,16 +251,13 @@
             const otpDisplay = document.getElementById('display-otp');
             otpDisplay.innerHTML = `<span style="color: var(--text-muted); font-size: 16px;">Mengecek ke server...</span>`;
             
-            // Simulasi ngecek OTP (Di aplikasi asli, ini panggil API backend)
             setTimeout(() => {
-                // Untuk simulasi UI, kita biarkan statusnya tetap menunggu 
-                // agar auditor paham flow-nya.
+                
                 otpDisplay.innerHTML = `<span style="color: var(--text-muted); font-size: 16px;">SMS belum masuk. Coba lagi.</span>`;
             }, 1500);
         }
 
         function cancelOrder() {
-            // Logika Cancel (Hanya bisa ditekan setelah 5 menit)
             alert('Pesanan berhasil dibatalkan. Saldo telah dikembalikan.');
             clearInterval(cancelTimer);
             document.getElementById('step-3').classList.add('hidden');
