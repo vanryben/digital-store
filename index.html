@@ -54,7 +54,7 @@
         .btn-danger { background-color: var(--danger); }
         .btn-danger:hover { background-color: var(--danger-hover); }
         .btn-success { background-color: var(--success); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button:disabled { opacity: 0.7; cursor: not-allowed; }
 
         /* Operator List */
         .operator-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
@@ -67,6 +67,13 @@
         .phone-number { font-size: 32px; font-weight: bold; color: var(--primary); margin: 15px 0; letter-spacing: 2px; }
         .otp-display { font-size: 24px; background-color: var(--bg-dark); padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px dashed var(--primary); min-height: 65px; display: flex; align-items: center; justify-content: center; }
         .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+
+        /* Invoice & QRIS Area */
+        .invoice-box { background-color: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 20px; text-align: left; margin-bottom: 20px; }
+        .invoice-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+        .invoice-total { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); font-size: 18px; font-weight: bold; color: var(--success); }
+        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; vertical-align: middle; margin-right: 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Legal Section */
         .legal-container { margin-top: 40px; padding: 25px; background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); }
@@ -94,12 +101,8 @@
 </head>
 <body>
 
-    <!-- ==========================================
-         AUTHENTICATION SCREEN (LOGIN / REGISTER)
-         ========================================== -->
+    <!-- AUTHENTICATION SCREEN (LOGIN / REGISTER) -->
     <div id="auth-screen" class="auth-wrapper">
-        
-        <!-- Login Form -->
         <div id="login-form" class="auth-card">
             <h2>VanaOTP</h2>
             <p>Masuk ke dashboard panel Anda</p>
@@ -115,7 +118,6 @@
             <p style="margin-top: 20px; margin-bottom: 0;">Belum punya akun? <span class="auth-link" onclick="toggleAuth('register')">Daftar di sini</span></p>
         </div>
 
-        <!-- Register Form -->
         <div id="register-form" class="auth-card hidden">
             <h2>Daftar Akun</h2>
             <p>Buat akun untuk mulai menggunakan layanan</p>
@@ -132,12 +134,8 @@
         </div>
     </div>
 
-
-    <!-- ==========================================
-         MAIN APPLICATION (DASHBOARD)
-         ========================================== -->
+    <!-- MAIN APPLICATION (DASHBOARD) -->
     <div id="main-app" class="hidden">
-        
         <header>
             <div class="nav-container">
                 <a href="#" class="logo">VanaOTP</a>
@@ -158,7 +156,6 @@
             <div id="section-nokos" class="card">
                 <h2 class="card-title">Order Nomor Virtual (OTP)</h2>
                 
-                <!-- Step 1: Form -->
                 <div id="step-1">
                     <div class="form-group">
                         <label>Pilih Negara</label>
@@ -180,15 +177,12 @@
                     <button class="btn-primary" onclick="showOperators()">Cek Ketersediaan & Harga</button>
                 </div>
 
-                <!-- Step 2: Operator List -->
                 <div id="step-2" class="hidden">
                     <button onclick="goBack('step-1')" style="background: none; color: var(--text-muted); text-align: left; padding: 0; margin-bottom: 15px; width: auto; font-size: 14px;">&larr; Kembali</button>
                     <h3 style="margin-bottom: 10px;">Pilih Operator:</h3>
-                    <div class="operator-list" id="operator-container">
-                    </div>
+                    <div class="operator-list" id="operator-container"></div>
                 </div>
 
-                <!-- Step 3: Order Active -->
                 <div id="step-3" class="order-active">
                     <h3>Pesanan Aktif</h3>
                     <p style="color: var(--text-muted); margin-top: 5px;">Silakan masukkan nomor ini ke aplikasi tujuan.</p>
@@ -207,25 +201,49 @@
                 </div>
             </div>
 
-            <!-- SECTION: DEPOSIT -->
+            <!-- SECTION: DEPOSIT (DIPERBARUI UNTUK SIMULASI TOKOPAY) -->
             <div id="section-deposit" class="card hidden">
                 <h2 class="card-title">Isi Saldo (Deposit)</h2>
-                <p style="margin-bottom: 20px; color: var(--text-muted);">Silakan pilih nominal deposit. Pembayaran diproses otomatis 24 jam.</p>
+                <p style="margin-bottom: 20px; color: var(--text-muted);">Sistem kami terintegrasi dengan Payment Gateway QRIS. Transaksi diproses instan 24/7.</p>
                 
                 <div id="form-deposit">
                     <div class="form-group">
                         <label>Nominal Deposit (Rp)</label>
                         <input type="number" id="deposit-amount" placeholder="Minimal Rp 10.000" min="10000">
                     </div>
-                    <button class="btn-primary" onclick="tampilkanQRIS()">Lanjut Pembayaran QRIS</button>
+                    <button class="btn-primary" id="btn-deposit-submit" onclick="prosesAPI_TokoPay()">Buat Tiket Deposit</button>
                 </div>
 
-                <!-- QRIS Display Area -->
-                <div id="qris-container" class="hidden" style="text-align: center; margin-top: 20px; padding: 25px; border: 1px dashed var(--primary); border-radius: 8px; background-color: var(--bg-dark);">
-                    <h3 style="margin-bottom: 15px; color: var(--success);">Scan QRIS Berikut</h3>
-                    <img src="https://i.imgur.com/TSXWW2y.png" alt="QRIS VanaOTP" style="max-width: 100%; height: auto; border-radius: 8px; border: 4px solid white;">
-                    <p style="margin-top: 15px; color: var(--text-muted); font-size: 14px;">Silakan scan kode QR di atas menggunakan aplikasi DANA, OVO, GoPay, ShopeePay, atau Mobile Banking Anda. Saldo akan masuk setelah sistem memverifikasi mutasi.</p>
-                    <button class="btn-primary" onclick="showSection('nokos')" style="margin-top: 15px; width: auto; padding: 10px 20px;">Selesai Bayar</button>
+                <!-- QRIS & Invoice Display Area -->
+                <div id="qris-container" class="hidden" style="text-align: center; margin-top: 20px;">
+                    
+                    <div class="invoice-box">
+                        <h3 style="margin-bottom: 15px; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 10px;">Invoice Pembayaran</h3>
+                        <div class="invoice-row">
+                            <span style="color: var(--text-muted);">Metode Pembayaran</span>
+                            <span>QRIS (All Payment)</span>
+                        </div>
+                        <div class="invoice-row">
+                            <span style="color: var(--text-muted);">Nominal Deposit</span>
+                            <span id="inv-nominal">Rp 0</span>
+                        </div>
+                        <div class="invoice-row">
+                            <span style="color: var(--text-muted);">Biaya Layanan & Kode Unik</span>
+                            <span id="inv-fee" style="color: var(--primary);">+ Rp 0</span>
+                        </div>
+                        <div class="invoice-total">
+                            <span>Total Pembayaran</span>
+                            <span id="inv-total">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <div style="padding: 25px; border: 1px dashed var(--primary); border-radius: 8px; background-color: var(--bg-dark);">
+                        <h3 style="margin-bottom: 15px; color: var(--success);">Scan QRIS Berikut</h3>
+                        <img src="https://i.imgur.com/TSXWW2y.png" alt="QRIS VanaOTP" style="max-width: 100%; height: auto; border-radius: 8px; border: 4px solid white;">
+                        <p style="margin-top: 15px; color: var(--text-muted); font-size: 14px;">Waktu Kadaluarsa: <b>15 Menit</b><br>Silakan scan kode QR di atas. Saldo akan otomatis masuk ke akun Anda setelah pembayaran berhasil (Webhook Connected).</p>
+                    </div>
+                    
+                    <button class="btn-primary" onclick="showSection('nokos')" style="margin-top: 20px;">Selesai Bayar</button>
                 </div>
             </div>
 
@@ -245,7 +263,7 @@
 
                 <div class="legal-item">
                     <h4>3. Kebijakan Pengembalian Dana (Refund Policy)</h4>
-                    <p>Sistem kami bekerja secara otomatis. Jika SMS/OTP tidak masuk dalam batas waktu yang ditentukan (5 menit), Anda dapat menekan tombol "Batalkan" dan <strong>saldo akun VanaOTP Anda akan dikembalikan 100% secara instan</strong>. Namun, saldo yang sudah didepositkan ke akun VanaOTP melalui QRIS tidak dapat di-refund atau dicairkan kembali ke rekening bank/e-wallet Anda (Non-refundable deposit). Transaksi dianggap sukses dan final apabila SMS/OTP pertama telah berhasil diterima.</p>
+                    <p>Sistem kami bekerja secara otomatis. Jika SMS/OTP tidak masuk dalam batas waktu yang ditentukan (5 menit), Anda dapat menekan tombol "Batalkan" dan <strong>saldo akun VanaOTP Anda akan dikembalikan 100% secara instan</strong>. Namun, saldo yang sudah didepositkan ke akun VanaOTP melalui QRIS TokoPay tidak dapat di-refund atau dicairkan kembali ke rekening bank/e-wallet Anda (Non-refundable deposit). Transaksi dianggap sukses dan final apabila SMS/OTP pertama telah berhasil diterima.</p>
                 </div>
             </div>
 
@@ -260,7 +278,7 @@
 
         <footer>
             <p>&copy; 2026 VanaOTP - Layanan Aktivasi Virtual.</p>
-            <p style="margin-top: 5px; opacity: 0.5;">Layanan ini beroperasi secara otomatis 24/7.</p>
+            <p style="margin-top: 5px; opacity: 0.5;">Layanan ini beroperasi secara otomatis 24/7. Pembayaran diproses oleh mitra Payment Gateway resmi.</p>
         </footer>
     </div>
 
@@ -299,7 +317,6 @@
             document.getElementById('login-password').value = '';
         }
 
-        /* --- LOGIC NAVIGATION & DEPOSIT --- */
         function showSection(sectionId) {
             document.getElementById('section-nokos').classList.add('hidden');
             document.getElementById('section-deposit').classList.add('hidden');
@@ -310,18 +327,50 @@
                 document.getElementById('form-deposit').classList.remove('hidden');
                 document.getElementById('qris-container').classList.add('hidden');
                 document.getElementById('deposit-amount').value = '';
+                
+                // Reset tombol
+                const btn = document.getElementById('btn-deposit-submit');
+                btn.innerHTML = "Buat Tiket Deposit";
+                btn.disabled = false;
             }
         }
 
-        function tampilkanQRIS() {
-            const amount = document.getElementById('deposit-amount').value;
-            if(!amount || amount < 10000) {
+        /* --- SIMULASI API PAYMENT GATEWAY --- */
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+        }
+
+        function prosesAPI_TokoPay() {
+            const amountInput = document.getElementById('deposit-amount').value;
+            const nominal = parseInt(amountInput);
+
+            if(!amountInput || nominal < 10000) {
                 alert("Mohon masukkan nominal deposit minimal Rp 10.000");
                 return;
             }
             
-            document.getElementById('form-deposit').classList.add('hidden');
-            document.getElementById('qris-container').classList.remove('hidden');
+            const btn = document.getElementById('btn-deposit-submit');
+            // Efek simulasi komunikasi ke server Payment Gateway
+            btn.innerHTML = '<span class="loading-spinner"></span>Menghubungkan ke API Payment Gateway...';
+            btn.disabled = true;
+
+            // Kalkulator Rahasia (Persis seperti bot Telegram Anda)
+            const biayaLayanan = Math.ceil((nominal * 0.007) + 100);
+            const kodeUnik = Math.floor(Math.random() * 999) + 1;
+            const totalTransfer = nominal + biayaLayanan + kodeUnik;
+            const totalManipulasi = totalTransfer - nominal;
+
+            // Simulasi jeda waktu request API selama 2 detik
+            setTimeout(() => {
+                // Mengisi data ke Invoice
+                document.getElementById('inv-nominal').innerText = formatRupiah(nominal);
+                document.getElementById('inv-fee').innerText = "+ " + formatRupiah(totalManipulasi);
+                document.getElementById('inv-total').innerText = formatRupiah(totalTransfer);
+
+                // Ubah tampilan UI
+                document.getElementById('form-deposit').classList.add('hidden');
+                document.getElementById('qris-container').classList.remove('hidden');
+            }, 2000);
         }
 
         /* --- LOGIC NOKOS & OPERATOR --- */
@@ -343,7 +392,7 @@
 
             mockOperators.forEach(op => {
                 let finalPrice = op.basePrice + PROFIT_MARGIN;
-                let formattedPrice = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(finalPrice);
+                let formattedPrice = formatRupiah(finalPrice);
                 
                 let div = document.createElement('div');
                 div.className = 'operator-item';
