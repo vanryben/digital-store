@@ -36,6 +36,7 @@
         .nav-links a { color: var(--text-main); text-decoration: none; margin-left: 20px; font-weight: 500; transition: color 0.2s; cursor: pointer; }
         .nav-links a:hover { color: var(--primary); }
         .user-badge { background: var(--primary); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-left: 20px; }
+        .balance-badge { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-left: 20px; }
 
         /* Main Container */
         .container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
@@ -68,13 +69,10 @@
         .otp-display { font-size: 24px; background-color: var(--bg-dark); padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px dashed var(--primary); min-height: 65px; display: flex; align-items: center; justify-content: center; }
         .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
 
-        /* Invoice & QRIS Area */
-        .invoice-box { background-color: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 20px; text-align: left; margin-bottom: 20px; }
-        .invoice-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
-        .invoice-total { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); font-size: 18px; font-weight: bold; color: var(--success); }
+        /* UI Utilities */
         .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; vertical-align: middle; margin-right: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
+        
         /* Legal Section */
         .legal-container { margin-top: 40px; padding: 25px; background-color: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); }
         .legal-item { margin-bottom: 25px; }
@@ -89,13 +87,12 @@
         
         footer { text-align: center; margin-top: 50px; padding-bottom: 30px; color: var(--text-muted); font-size: 13px; }
 
-        /* Utilities */
         .hidden { display: none !important; }
         
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .nav-container { flex-direction: column; gap: 15px; }
-            .nav-links a { margin: 0 10px; }
-            .user-badge { margin: 10px 0 0 0; display: inline-block; }
+            .nav-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+            .nav-links a, .user-badge, .balance-badge { margin: 0; }
         }
     </style>
 </head>
@@ -144,8 +141,10 @@
                     <a onclick="showSection('deposit')">Deposit</a>
                     <a href="#legal">Legalitas</a>
                     <a href="mailto:vegetariann234@gmail.com">Bantuan</a>
+                    <!-- SALDO DITAMBAHKAN DI SINI -->
+                    <span class="balance-badge">Saldo: Rp 25.500</span>
                     <span class="user-badge" id="user-display-email">user@email.com</span>
-                    <a onclick="doLogout()" style="color: var(--danger); font-size: 12px; margin-left: 10px;">Keluar</a>
+                    <a onclick="doLogout()" style="color: var(--danger); font-size: 12px;">Keluar</a>
                 </nav>
             </div>
         </header>
@@ -171,6 +170,7 @@
                             <option value="whatsapp">WhatsApp</option>
                             <option value="telegram">Telegram</option>
                             <option value="instagram">Instagram</option>
+                            <option value="shopee">Shopee</option>
                             <option value="tiktok">TikTok</option>
                         </select>
                     </div>
@@ -201,7 +201,7 @@
                 </div>
             </div>
 
-            <!-- SECTION: DEPOSIT (DIPERBARUI UNTUK SIMULASI TOKOPAY) -->
+            <!-- SECTION: DEPOSIT -->
             <div id="section-deposit" class="card hidden">
                 <h2 class="card-title">Isi Saldo (Deposit)</h2>
                 <p style="margin-bottom: 20px; color: var(--text-muted);">Sistem kami terintegrasi dengan Payment Gateway QRIS. Transaksi diproses instan 24/7.</p>
@@ -212,38 +212,9 @@
                         <input type="number" id="deposit-amount" placeholder="Minimal Rp 10.000" min="10000">
                     </div>
                     <button class="btn-primary" id="btn-deposit-submit" onclick="prosesAPI_TokoPay()">Buat Tiket Deposit</button>
-                </div>
-
-                <!-- QRIS & Invoice Display Area -->
-                <div id="qris-container" class="hidden" style="text-align: center; margin-top: 20px;">
                     
-                    <div class="invoice-box">
-                        <h3 style="margin-bottom: 15px; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 10px;">Invoice Pembayaran</h3>
-                        <div class="invoice-row">
-                            <span style="color: var(--text-muted);">Metode Pembayaran</span>
-                            <span>QRIS (All Payment)</span>
-                        </div>
-                        <div class="invoice-row">
-                            <span style="color: var(--text-muted);">Nominal Deposit</span>
-                            <span id="inv-nominal">Rp 0</span>
-                        </div>
-                        <div class="invoice-row">
-                            <span style="color: var(--text-muted);">Biaya Layanan & Kode Unik</span>
-                            <span id="inv-fee" style="color: var(--primary);">+ Rp 0</span>
-                        </div>
-                        <div class="invoice-total">
-                            <span>Total Pembayaran</span>
-                            <span id="inv-total">Rp 0</span>
-                        </div>
+                    <div id="deposit-error" class="hidden" style="margin-top: 15px; padding: 15px; background-color: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); border-radius: 8px; color: #f87171; text-align: left; font-size: 15px; line-height: 1.5;">
                     </div>
-
-                    <div style="padding: 25px; border: 1px dashed var(--primary); border-radius: 8px; background-color: var(--bg-dark);">
-                        <h3 style="margin-bottom: 15px; color: var(--success);">Scan QRIS Berikut</h3>
-                        <img src="https://i.imgur.com/TSXWW2y.png" alt="QRIS VanaOTP" style="max-width: 100%; height: auto; border-radius: 8px; border: 4px solid white;">
-                        <p style="margin-top: 15px; color: var(--text-muted); font-size: 14px;">Waktu Kadaluarsa: <b>15 Menit</b><br>Silakan scan kode QR di atas. Saldo akan otomatis masuk ke akun Anda setelah pembayaran berhasil (Webhook Connected).</p>
-                    </div>
-                    
-                    <button class="btn-primary" onclick="showSection('nokos')" style="margin-top: 20px;">Selesai Bayar</button>
                 </div>
             </div>
 
@@ -324,20 +295,14 @@
             document.getElementById('section-' + sectionId).classList.remove('hidden');
 
             if(sectionId === 'deposit') {
-                document.getElementById('form-deposit').classList.remove('hidden');
-                document.getElementById('qris-container').classList.add('hidden');
+                // Reset form state saat menu deposit dibuka
                 document.getElementById('deposit-amount').value = '';
+                document.getElementById('deposit-error').classList.add('hidden');
                 
-                // Reset tombol
                 const btn = document.getElementById('btn-deposit-submit');
                 btn.innerHTML = "Buat Tiket Deposit";
                 btn.disabled = false;
             }
-        }
-
-        /* --- SIMULASI API PAYMENT GATEWAY --- */
-        function formatRupiah(angka) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
         }
 
         function prosesAPI_TokoPay() {
@@ -350,30 +315,27 @@
             }
             
             const btn = document.getElementById('btn-deposit-submit');
-            // Efek simulasi komunikasi ke server Payment Gateway
+            const errorBox = document.getElementById('deposit-error');
+            
+            errorBox.classList.add('hidden');
+
             btn.innerHTML = '<span class="loading-spinner"></span>Menghubungkan ke API Payment Gateway...';
             btn.disabled = true;
 
-            // Kalkulator Rahasia (Persis seperti bot Telegram Anda)
-            const biayaLayanan = Math.ceil((nominal * 0.007) + 100);
-            const kodeUnik = Math.floor(Math.random() * 999) + 1;
-            const totalTransfer = nominal + biayaLayanan + kodeUnik;
-            const totalManipulasi = totalTransfer - nominal;
-
-            // Simulasi jeda waktu request API selama 2 detik
             setTimeout(() => {
-                // Mengisi data ke Invoice
-                document.getElementById('inv-nominal').innerText = formatRupiah(nominal);
-                document.getElementById('inv-fee').innerText = "+ " + formatRupiah(totalManipulasi);
-                document.getElementById('inv-total').innerText = formatRupiah(totalTransfer);
+                btn.innerHTML = 'Buat Tiket Deposit';
+                btn.disabled = false;
 
-                // Ubah tampilan UI
-                document.getElementById('form-deposit').classList.add('hidden');
-                document.getElementById('qris-container').classList.remove('hidden');
+                errorBox.innerHTML = `<strong>🚨 Gangguan Payment Gateway</strong><br>Sistem gagal membuat tiket deposit. Silakan coba beberapa saat lagi.`;
+                errorBox.classList.remove('hidden');
             }, 2000);
         }
 
         /* --- LOGIC NOKOS & OPERATOR --- */
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+        }
+
         function showOperators() {
             document.getElementById('step-1').classList.add('hidden');
             document.getElementById('step-2').classList.remove('hidden');
